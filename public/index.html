@@ -1,0 +1,29 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <title>WebTransport + WebRTC SDP over WT</title>
+  <style>
+    body { font-family: sans-serif; padding: 1rem; }
+    pre  { background: #f4f4f4; padding: 0.5rem; overflow-x: auto; }
+  </style>
+</head>
+<body>
+  <h1>WebTransport + WebRTC SDP over WT</h1>
+  <p>Status: <span id="status">Disconnected</span></p>
+  <p>Transport: <span id="transport">N/A</span></p>
+  <button id="start">Start WebRTC</button>
+
+  <video
+    id="remote"
+    autoplay playsinline muted
+    width="640" height="480"
+    style="background: black; display: block; margin-top: 1rem;"
+  ></video>
+
+  <pre id="log"></pre>
+
+  <script src="/socket.io/socket.io.js"></script>
+  <script src="/client.js"></script>
+</body>
+</html>
