@@ -1,5 +1,5 @@
 #!/bin/bash
-HASH=`openssl x509 -pubkey -noout -in cert.pem |
+HASH=`openssl x509 -pubkey -noout -in ./certs/cert.pem |
     openssl pkey -pubin -outform der |
     openssl dgst -sha256 -binary |
     base64`
