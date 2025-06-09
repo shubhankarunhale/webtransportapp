@@ -5,24 +5,21 @@ import { Http3Server } from "@fails-components/webtransport";
 import { attachSignalling } from "./controllers/signalling.js";
 
 async function main() {
-    // 1) Load certs
+    // Load TLS certificates
     const key = await readFile("./certs/key.pem");
     const cert = await readFile("./certs/cert.pem");
 
-    // 2) Express app for static client
     const app = express();
     app.use(express.static("public"));
 
-    // 3) HTTPS server
     const httpsServer = createServer({ key, cert }, app);
     httpsServer.listen(3000, () =>
         console.log("HTTPS listening on https://127.0.0.1:3000")
     );
 
-    // 4) Socket.IO signalling
     const io = attachSignalling(httpsServer);
 
-    // 5) HTTP/3 → WebTransport bridge
+    // Start WebTransport HTTP/3 server
     const h3 = new Http3Server({
         host: "0.0.0.0",
         port: 3000,
@@ -32,7 +29,7 @@ async function main() {
     });
     h3.startServer();
 
-    // 6) Pump sessions into Socket.IO
+    // Handle WebTransport sessions
     const sessionReader = (await h3.sessionStream("/socket.io/")).getReader();
     (async function pump() {
         for (; ;) {
@@ -42,22 +39,17 @@ async function main() {
         }
     })();
 
-    // --------------------------------------------------------------
-    // 7) Graceful shutdown handlers
+    // Graceful shutdown
     const shutdown = async (signal) => {
         console.log(`\nReceived ${signal}, shutting down...`);
-        // Stop accepting new connections
         await new Promise(res => httpsServer.close(res));
         console.log("HTTPS server closed");
 
-        // Close Socket.IO
         io.close(() => console.log("Socket.IO closed"));
 
-        // Stop HTTP/3 server
         await h3.stopServer();
         console.log("HTTP/3 WebTransport bridge stopped");
 
-        // Finally exit
         process.exit(0);
     };
 
